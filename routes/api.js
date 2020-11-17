@@ -16,6 +16,22 @@ router.get('/students', function(req, res, next){
         .catch( err => next(err) )
 })
 
+// route for getting one specified student (get request)
+router.get('/students/:id', function(req, res, next){
+    Student.findByPk(req.params.id)
+        .then( (student) => {
+            if (student)
+            {
+                return res.json(student)
+            }
+            else
+            {
+                return res.status(404).send('Student not found');
+            }
+        })
+        .catch( err => next(err) )
+})
+
 // routes for adding a new student (post request)
 router.post('/students', function(req, res, next){
     Student.create(req.body)
@@ -26,17 +42,15 @@ router.post('/students', function(req, res, next){
             if (err instanceof Sequelize.ValidationError)
             {
                 let messages = err.errors.map(e => e.message);
-                // 400 = bad request from user
-                return res.status(400).json(messages)
+                return res.status(400).json(messages);              // 400 = bad request from user
             }
 
             return next(err);
         })
 })
 
-// routes for a patch request
+// routes for a patch request (for updating student information)
 router.patch('/students/:id', function(req, res, next) {
-    // update student information
     Student.update( req.body, {where: {id: req.params.id}} )
         .then( rowsModified => {
             if (!rowsModified[0])
